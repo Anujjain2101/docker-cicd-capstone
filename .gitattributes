@@ -1,0 +1,8 @@
+# Automatically normalize text files
+* text=auto
+
+# Force Linux line endings for scripts and configuration
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
