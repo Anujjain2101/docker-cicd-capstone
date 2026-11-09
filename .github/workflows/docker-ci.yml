@@ -40,3 +40,14 @@ jobs:
           done
 
           bash scripts/smoke-test.sh
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          scan-type: image
+          image-ref: winter-arc-app:ci
+          format: table
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
