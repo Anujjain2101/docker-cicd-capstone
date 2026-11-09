@@ -10,7 +10,8 @@ FROM python:3.12-slim
 
 # Apply the available Debian security update for zlib
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+    && apt-get install -y --no-install-recommends \
+       zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -r -u 10001 app
