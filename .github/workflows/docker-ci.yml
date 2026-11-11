@@ -67,3 +67,36 @@ jobs:
         run: |
           docker tag winter-arc-app:ci "$IMAGE:$SHA"
           docker push "$IMAGE:$SHA"
+
+  deploy-test:
+    name: Deploy to Ubuntu EC2
+    needs: lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Deploy application over SSH
+        env:
+          TEST_HOST: ${{ secrets.TEST_HOST }}
+          TEST_USER: ${{ secrets.TEST_USER }}
+          TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
+          TEST_KNOWN_HOSTS: ${{ secrets.TEST_KNOWN_HOSTS }}
+          IMAGE_SHA: ${{ github.sha }}
+
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$TEST_SSH_KEY" > ~/.ssh/ec2_deploy
+          chmod 600 ~/.ssh/ec2_deploy
+
+          printf '%s\n' "$TEST_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/ec2_deploy \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            "$TEST_USER@$TEST_HOST" \
+            "sudo -n /usr/local/bin/deploy-winter-arc $IMAGE_SHA"
